@@ -110,7 +110,7 @@ core-app/platform/
 
 Java 21, Spring Boot 3.5.6, Lombok, Resilience4j, Jinjava, Conductor, Redisson.
 
-### `CustomerDto.java` — in `customer-onboarding-schema`
+### `CustomerDto.java` — in `customer-onboarding/schema`
 
 ```java
 package com.commotion.onboarding.schema;

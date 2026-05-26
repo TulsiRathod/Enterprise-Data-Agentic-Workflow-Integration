@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":customer-onboarding-schema"))
+    implementation(project(":customer-onboarding:schema"))
     implementation(project(":integrations-crm-legacy"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")

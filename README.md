@@ -12,10 +12,10 @@ into a rate-limited, undocumented legacy CRM REST API.
 - **Gradle (Kotlin DSL) multi-module** — triple-module pattern per service:
   `{service}` / `{service}-schema` / `{service}-grpc-client`.
 - **Netflix Conductor / Orkes** — workflow orchestration. Workflow definition
-  lives at [customer-onboarding/src/main/resources/workflows/customer_onboarding_v1.json](customer-onboarding/src/main/resources/workflows/customer_onboarding_v1.json).
+  lives at [customer-onboarding/app/src/main/resources/workflows/customer_onboarding_v1.json](customer-onboarding/app/src/main/resources/workflows/customer_onboarding_v1.json).
 - **Spring State Machine 4.0.1** — per-record status tracking.
 - **Resilience4j** — `Retry` + `CircuitBreaker` + `RateLimiter`, configured
-  declaratively in [`application.yml`](customer-onboarding/src/main/resources/application.yml).
+  declaratively in [`application.yml`](customer-onboarding/app/src/main/resources/application.yml).
 - **Redisson (cache-utils)** — idempotency keys via `SET NX EX`.
 - **Jinjava** — prompt templates (same engine the platform already uses).
 - **AWS SDK v2** — S3 fetch (via `BlobStoreClient` facade modeling `blob-store-utils`).
@@ -26,18 +26,19 @@ into a rate-limited, undocumented legacy CRM REST API.
 
 ```
 .
-├── customer-onboarding-schema/     # plain JAR — DTOs, enums, events
-├── customer-onboarding/            # Spring Boot impl
-│   └── src/main/
-│       ├── java/com/commotion/onboarding/
-│       │   ├── OnboardingApplication.java
-│       │   ├── config/             # @Configuration beans
-│       │   ├── parse/              # LLM parser + AiProxyClient
-│       │   ├── state/              # Spring State Machine
-│       │   └── workflow/           # OnboardingService + REST controller
-│       └── resources/
-│           ├── application.yml
-│           └── workflows/customer_onboarding_v1.json
+├── customer-onboarding/
+│   ├── schema/                     # plain JAR — DTOs, enums, events
+│   └── app/                        # Spring Boot impl
+│       └── src/main/
+│           ├── java/com/commotion/onboarding/
+│           │   ├── OnboardingApplication.java
+│           │   ├── config/         # @Configuration beans
+│           │   ├── parse/          # LLM parser + AiProxyClient
+│           │   ├── state/          # Spring State Machine
+│           │   └── workflow/       # OnboardingService + REST controller
+│           └── resources/
+│               ├── application.yml
+│               └── workflows/customer_onboarding_v1.json
 ├── integrations-crm-legacy/        # Resilience4j-wrapped REST adapter
 └── docs/
     └── ARCHITECTURE.md             # diagram, data flow, design choices
@@ -56,7 +57,7 @@ Then:
 
 ```bash
 ./gradlew build
-./gradlew :customer-onboarding:bootRun
+./gradlew :customer-onboarding:app:bootRun
 ```
 
 Required environment for `bootRun`:
