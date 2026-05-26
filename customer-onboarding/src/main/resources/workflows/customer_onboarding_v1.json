@@ -1,0 +1,44 @@
+{
+  "name": "customer_onboarding_v1",
+  "description": "Ingest a customer document from S3, parse with LLM, upsert into legacy CRM, and reconcile.",
+  "version": 1,
+  "schemaVersion": 2,
+  "tasks": [
+    {
+      "name": "parse_document",
+      "taskReferenceName": "parse",
+      "inputParameters": {
+        "bucket": "${workflow.input.bucket}",
+        "key":    "${workflow.input.key}"
+      },
+      "type": "SIMPLE"
+    },
+    {
+      "name": "upsert_crm",
+      "taskReferenceName": "upsert",
+      "inputParameters": {
+        "customer": "${parse.output.customer}"
+      },
+      "type": "SIMPLE",
+      "retryCount": 3,
+      "retryLogic": "EXPONENTIAL_BACKOFF",
+      "retryDelaySeconds": 2
+    },
+    {
+      "name": "reconcile_crm",
+      "taskReferenceName": "reconcile",
+      "inputParameters": {
+        "crmId":    "${upsert.output.crmId}",
+        "expected": "${parse.output.customer}"
+      },
+      "type": "SIMPLE"
+    }
+  ],
+  "inputParameters": ["bucket", "key", "tenantId"],
+  "outputParameters": {
+    "crmId":  "${upsert.output.crmId}",
+    "status": "${reconcile.output.status}"
+  },
+  "failureWorkflow": "customer_onboarding_dlt_v1",
+  "ownerEmail": "onboarding@commotion.example"
+}

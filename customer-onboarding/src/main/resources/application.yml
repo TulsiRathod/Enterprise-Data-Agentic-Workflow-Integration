@@ -1,0 +1,70 @@
+spring:
+  application:
+    name: customer-onboarding
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb://localhost:27017/onboarding}
+
+server:
+  port: 8089
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+onboarding:
+  aws:
+    region: ${AWS_REGION:us-east-1}
+  parse:
+    max-repairs: 2
+    model: claude-opus-4-7
+  ai:
+    base-url: https://api.anthropic.com
+    api-key: ${ANTHROPIC_API_KEY:}
+  crm:
+    base-url: ${LEGACY_CRM_URL:https://legacy-crm.internal/api/v1}
+    api-key: ${LEGACY_CRM_API_KEY:}
+  idempotency:
+    ttl: 86400s
+
+redisson:
+  config:
+    singleServerConfig:
+      address: ${REDIS_URL:redis://localhost:6379}
+
+resilience4j:
+  retry:
+    instances:
+      legacyCrm:
+        max-attempts: 6
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        exponential-max-wait-duration: 30s
+        randomized-wait-factor: 0.5
+        retry-exceptions:
+          - com.commotion.integrations.crm.LegacyCrmAdapter$RateLimitedException
+          - com.commotion.integrations.crm.LegacyCrmAdapter$TransientCrmException
+          - java.io.IOException
+  circuitbreaker:
+    instances:
+      legacyCrm:
+        failure-rate-threshold: 50
+        sliding-window-size: 20
+        wait-duration-in-open-state: 60s
+        permitted-number-of-calls-in-half-open-state: 3
+  ratelimiter:
+    instances:
+      legacyCrm:
+        limit-for-period: 5
+        limit-refresh-period: 1s
+        timeout-duration: 10s
+
+logging:
+  level:
+    com.commotion: INFO
